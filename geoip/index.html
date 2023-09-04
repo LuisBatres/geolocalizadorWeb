@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Geolocalizador</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header>
+        <h1>GEOLOCALIZADOR</h1>
+        <nav>
+            <ul>
+                <li><a href="#">Inicio</a></li>
+                <li><a href="#">Acerca de</a></li>
+                <li><a href="#">Servicios</a></li>
+                <li><a href="#">Contacto</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <section>
+            <div class="divObtener">
+                <h2>Obtener mi IP</h2>
+                <button id="obtenerBtn">OBTENER</button>
+            </div>
+
+            <div class="divBuscar">
+                <label for="buscarIP">Buscar IP:</label>
+                <input type="text" id="buscarIP" name="buscarIP">
+                <button id="buscarBtn">BUSCAR</button>
+            </div>
+            
+            <div class="divInfo" id="info">
+                
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <p>Todos los derechos reservados © 2023. Luis Batres Freelancer</p>
+    </footer>
+</body>
+
+<script src="//js.maxmind.com/js/apis/geoip2/v2.1/geoip2.js" type="text/javascript"></script>
+<script type="text/javascript">
+    
+    var onSuccess = function(location){
+        var infoDiv = document.getElementById('info');
+        infoDiv.innerHTML = "Tu IP es: " + location.traits.ip_address +
+                        "<br>Tu país es: " + location.country.names.es + 
+                        "<br>Tu ciudad es: " + location.city.names.es +
+                        "<br>Tu región es: " + location.subdivisions[0].names.es + 
+                        "<br>Latitud: " + location.location.latitude + 
+                        "<br>Longitud: " + location.location.longitude;
+
+                        infoDiv.style.display = 'block';
+    };
+
+    var onError = function(error){
+        var infoDiv = document.getElementById('info');
+        infoDiv.innerHTML = "Error al obtener la ubicación: " + error;
+    };
+
+    document.getElementById('obtenerBtn').addEventListener('click', function(){
+        geoip2.city(onSuccess, onError);
+    });
+
+    document.getElementById('buscarBtn').addEventListener('click', function(){
+    var ipToSearch = document.getElementById('buscarIP').value; // Obtén la IP ingresada por el usuario
+    var infoDiv = document.getElementById('info');
+    // Envía una solicitud HTTP para obtener información de la IP
+    var urlConsume='https://ipinfo.io/' + ipToSearch + '?token=fd0f18d73bc4f5';
+    fetch(urlConsume)
+        .then(function(response) {
+            return response.json();
+        })
+        .then(function(data) {
+            // Verifica si se obtuvo información válida
+            if (data.ip) {
+                console.log(data.ip)
+                console.log(data.city)
+                console.log(data.region)
+                console.log(data.country)
+                console.log(data.loc)
+                infoDiv.innerHTML = "IP: " + data.ip +
+                    "<br>Ubicación: " + data.city + ", " + data.region + ", " + data.country +
+                    "<br>Latitud: " + data.loc.split(',')[0] +
+                    "<br>Longitud: " + data.loc.split(',')[1];
+                infoDiv.style.display = 'block';
+            } else {
+                infoDiv.innerHTML = "No se encontró información para la IP ingresada.";
+            }
+        })
+        .catch(function(error) {
+            infoDiv.innerHTML = "Error al buscar la IP: " + error;
+        });
+});
+</script>
+
+</html>
